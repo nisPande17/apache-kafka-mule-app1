@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:apachekafka="http://www.mulesoft.org/schema/mule/apachekafka" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/apachekafka http://www.mulesoft.org/schema/mule/apachekafka/current/mule-apachekafka.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
+    <apachekafka:config name="Apache_Kafka__Configuration" bootstrapServers="localhost:9091" consumerPropertiesFile="consumer.properties" producerPropertiesFile="producer.properties" doc:name="Apache Kafka: Configuration"/>
+    <flow name="apache-kafka-producer">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/kafka" allowedMethods="POST" doc:name="HTTP"/>
+        <logger message="Message Published : #[payload]" level="INFO" doc:name="Logger"/>
+        <apachekafka:producer config-ref="Apache_Kafka__Configuration" topic="muleesb" key="#[server.dateTime.getMilliSeconds()" doc:name="Apache Kafka"/>
+    </flow>
+    <flow name="apache-kafka-consumer">
+        <apachekafka:consumer config-ref="Apache_Kafka__Configuration" topic="muleesb" partitions="1" doc:name="Apache Kafka (Streaming)"/>
+        <logger message="Message Consumed: #[payload]" level="INFO" doc:name="Logger"/>
+        <file:outbound-endpoint path="C:\Users\IBM_ADMIN\AnypointStudio\workspace1\apache-kafka-mule-app\src\test\resources\consumer" responseTimeout="10000" doc:name="File"/>
+    </flow>
+</mule>
